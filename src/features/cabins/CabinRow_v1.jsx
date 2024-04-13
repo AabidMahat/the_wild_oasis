@@ -8,7 +8,7 @@ import { MdDelete } from "react-icons/md";
 import { FaUserEdit } from "react-icons/fa";
 import { useCreateCabin } from "./useCreateCabin";
 import Modal from "../../ui/Modal";
-import ConfirmDelete from "./../../ui/ConfirmDelete";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 import Table from "../../ui/Table";
 import Menus from "../../ui/Menus";
 
@@ -72,36 +72,48 @@ function CabinRow({ cabin }) {
         <span>&mdash;</span>
       )}
       <div>
+        <Button
+          variation="tertiary"
+          size="small"
+          onClick={handleDuplicate}
+          disabled={isCreating}>
+          <IoDuplicate />
+        </Button>
+
         <Modal>
-          <Menus.Menu>
-            <Menus.Toggle id={id} />
-            <Menus.List id={id}>
-              <Menus.Button icon={<IoDuplicate />} onClick={handleDuplicate}>
-                Duplicate
-              </Menus.Button>
+          <Modal.Open opens="edit">
+            <Button variation="primary" size="small">
+              <FaUserEdit />
+            </Button>
+          </Modal.Open>
+          <Modal.Window name="edit">
+            <CreateCabinForm editCabin={cabin} />
+          </Modal.Window>
 
-              <Modal.Open opens="edit">
-                <Menus.Button icon={<FaUserEdit />}>Edit</Menus.Button>
-              </Modal.Open>
-
-              <Modal.Open opens="delete">
-                <Menus.Button icon={<MdDelete />}>Delete</Menus.Button>
-              </Modal.Open>
-            </Menus.List>
-
-            <Modal.Window name="edit">
-              <CreateCabinForm editCabin={cabin} />
-            </Modal.Window>
-
-            <Modal.Window name="delete">
-              <ConfirmDelete
-                resourceName="cabins"
-                disabled={isDeleting}
-                onConfirm={() => deleteCabin(id)}
-              />
-            </Modal.Window>
-          </Menus.Menu>
+          <Modal.Open opens="delete">
+            <Button variation="danger" size="small">
+              <MdDelete />
+            </Button>
+          </Modal.Open>
+          <Modal.Window name="delete">
+            <ConfirmDelete
+              resourceName="cabins"
+              disabled={isDeleting}
+              onConfirm={() => deleteCabin(id)}
+            />
+          </Modal.Window>
         </Modal>
+
+        <Menus.Menu>
+          <Menus.Toggle id={id} />
+          <Menus.List id={id}>
+            <Menus.Button icon={<IoDuplicate />} onClick={handleDuplicate}>
+              Duplicate
+            </Menus.Button>
+            <Menus.Button icon={<FaUserEdit />}>Edit</Menus.Button>
+            <Menus.Button icon={<MdDelete />}>Delete</Menus.Button>
+          </Menus.List>
+        </Menus.Menu>
       </div>
     </Table.Row>
   );

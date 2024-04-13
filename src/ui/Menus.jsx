@@ -1,6 +1,9 @@
+import { createContext, useContext, useState } from "react";
 import styled from "styled-components";
+import { MdOutlineMoreHoriz } from "react-icons/md";
+import useOutsideClick from "../hooks/useOutsideClick";
 
-const StyledMenu = styled.div`
+const Menu = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -60,3 +63,73 @@ const StyledButton = styled.button`
     transition: all 0.3s;
   }
 `;
+
+const menuContext = createContext();
+
+function Menus({ children }) {
+  const [openId, setOpenId] = useState("");
+  const [position, setPosition] = useState("");
+
+  const close = () => setOpenId("");
+  const open = (id) => setOpenId((prevId) => (prevId === id ? "" : id));
+
+  return (
+    <menuContext.Provider
+      value={{ openId, open, close, position, setPosition }}>
+      {children}
+    </menuContext.Provider>
+  );
+}
+
+function Toggle({ id }) {
+  const { openId, open, close, setPosition } = useContext(menuContext);
+
+  function handleClick(e) {
+    const rect = e.target.closest("button").getBoundingClientRect();
+    setPosition({
+      x: window.innerWidth - rect.width - rect.x,
+      y: rect.y + rect.height + 8,
+    });
+    openId === "" || openId !== id ? open(id) : close();
+    console.log(id, openId);
+  }
+
+  return (
+    <StyledToggle onClick={handleClick}>
+      <MdOutlineMoreHoriz />
+    </StyledToggle>
+  );
+}
+function List({ id, children }) {
+  const { openId, position, close } = useContext(menuContext);
+
+  const ref = useOutsideClick(close);
+
+  if (openId !== id) return null;
+  return (
+    <StyledList position={position} ref={ref}>
+      {children}
+    </StyledList>
+  );
+}
+function Button({ children, icon, onClick }) {
+  const { close } = useContext(menuContext);
+  function handleClick() {
+    onClick?.();
+    close();
+  }
+  return (
+    <li>
+      <StyledButton onClick={handleClick}>
+        {icon} <span>{children}</span>
+      </StyledButton>
+    </li>
+  );
+}
+
+Menus.Menu = Menu;
+Menus.Toggle = Toggle;
+Menus.List = List;
+Menus.Button = Button;
+
+export default Menus;
